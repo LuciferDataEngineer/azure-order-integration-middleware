@@ -1,0 +1,90 @@
+trigger: none
+pr: none
+
+parameters:
+- name: phase
+  type: string
+  default: validate
+  values: [validate, foundation, runtime, wired]
+- name: azureServiceConnection
+  type: string
+  default: UNCONFIGURED
+- name: resourceGroup
+  type: string
+  default: UNCONFIGURED
+- name: budgetApprovalReference
+  type: string
+  default: UNAPPROVED
+- name: sqlAdminName
+  type: string
+  default: UNCONFIGURED
+- name: sqlAdminObjectId
+  type: string
+  default: UNCONFIGURED
+- name: applicationClientId
+  type: string
+  default: ''
+- name: exporterImage
+  type: string
+  default: ''
+- name: actionGroupId
+  type: string
+  default: ''
+
+variables:
+  ORDERS_PHASE: ${{ parameters.phase }}
+  ORDERS_APPROVAL_REF: ${{ parameters.budgetApprovalReference }}
+  ORDERS_RESOURCE_GROUP: ${{ parameters.resourceGroup }}
+  ORDERS_SQL_ADMIN_NAME: ${{ parameters.sqlAdminName }}
+  ORDERS_SQL_ADMIN_ID: ${{ parameters.sqlAdminObjectId }}
+  ORDERS_APPLICATION_CLIENT_ID: ${{ parameters.applicationClientId }}
+  ORDERS_EXPORT_IMAGE: ${{ parameters.exporterImage }}
+  ORDERS_ACTION_GROUP: ${{ parameters.actionGroupId }}
+
+stages:
+- stage: Validate
+  jobs:
+  - job: LocalChecks
+    pool: { vmImage: 'ubuntu-latest' }
+    steps:
+    - checkout: self
+    - script: |
+        set -eu
+        python3 -m unittest discover -s tests -v
+        az bicep install --version v0.46.1
+        python3 infra/validate.py
+        bash -n infra/manage_lab.sh
+      displayName: Run local checks and compile templates
+
+- ${{ if ne(parameters.phase, 'validate') }}:
+  - stage: Preview
+    dependsOn: Validate
+    jobs:
+    - job: ResourceGroupWhatIf
+      pool: { vmImage: 'ubuntu-latest' }
+      steps:
+      - checkout: self
+      - task: AzureCLI@2
+        inputs:
+          azureSubscription: ${{ parameters.azureServiceConnection }}
+          scriptType: bash
+          scriptLocation: inlineScript
+          inlineScript: bash infra/manage_lab.sh plan
+
+  - stage: ApprovedLab
+    dependsOn: Preview
+    jobs:
+    - deployment: ScopedApply
+      environment: orders-lab-approved
+      pool: { vmImage: 'ubuntu-latest' }
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - checkout: self
+            - task: AzureCLI@2
+              inputs:
+                azureSubscription: ${{ parameters.azureServiceConnection }}
+                scriptType: bash
+                scriptLocation: inlineScript
+                inlineScript: bash infra/manage_lab.sh deploy

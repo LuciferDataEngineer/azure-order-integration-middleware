@@ -1,0 +1,14 @@
+{
+  "environment": "localhost Azurite, synthetic orders, captured send callback",
+  "blobs_created": 3,
+  "identical_blobs_reused": 3,
+  "canonical_bodies_recovered_by_etag": 3,
+  "extra_deliveries_per_consumer": 10,
+  "business_receipts": 6,
+  "audit_effects": 3,
+  "fulfillment_states": 2,
+  "stale_version_suppressed": true,
+  "transaction_rollback_verified": true,
+  "stale_etag_rejected": true,
+  "azure_deployed": false
+}

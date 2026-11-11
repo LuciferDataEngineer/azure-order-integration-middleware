@@ -1,0 +1,7 @@
+**
+!Dockerfile
+!order_source.py
+!order_export.py
+!azure/
+!azure/export/
+!azure/export/requirements.txt

@@ -1,0 +1,181 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "brokerBase": {
+      "type": "String"
+    },
+    "applyUri": {
+      "type": "String"
+    },
+    "brokerAuth": {
+      "type": "Object"
+    },
+    "functionAuth": {
+      "type": "Object"
+    }
+  },
+  "triggers": {
+    "Poll": {
+      "type": "Recurrence",
+      "recurrence": {
+        "frequency": "Minute",
+        "interval": 1
+      },
+      "runtimeConfiguration": {
+        "concurrency": {
+          "runs": 1
+        }
+      }
+    }
+  },
+  "actions": {
+    "Peek": {
+      "type": "Http",
+      "inputs": {
+        "method": "POST",
+        "uri": "@concat(parameters('brokerBase'),'head?timeout=5')",
+        "authentication": "@parameters('brokerAuth')",
+        "retryPolicy": {
+          "type": "None"
+        }
+      },
+      "operationOptions": "DisableAsyncPattern",
+      "runtimeConfiguration": {
+        "secureData": {
+          "properties": [
+            "inputs",
+            "outputs"
+          ]
+        }
+      },
+      "runAfter": {}
+    },
+    "Handle_received_message": {
+      "type": "If",
+      "expression": "@equals(outputs('Peek')?['statusCode'],201)",
+      "actions": {
+        "Lock_location": {
+          "type": "Compose",
+          "inputs": "@coalesce(outputs('Peek')?['headers']?['Location'],outputs('Peek')?['headers']?['location'],'')",
+          "runAfter": {},
+          "runtimeConfiguration": {
+            "secureData": {
+              "properties": [
+                "inputs",
+                "outputs"
+              ]
+            }
+          }
+        },
+        "Validate_lock_location": {
+          "type": "If",
+          "expression": "@and(startsWith(toLower(outputs('Lock_location')),toLower(parameters('brokerBase'))),not(contains(outputs('Lock_location'),'..')),not(contains(outputs('Lock_location'),'?')),not(contains(outputs('Lock_location'),'#')))",
+          "actions": {
+            "Apply": {
+              "type": "Http",
+              "inputs": {
+                "method": "POST",
+                "uri": "@parameters('applyUri')",
+                "authentication": "@parameters('functionAuth')",
+                "retryPolicy": {
+                  "type": "None"
+                },
+                "body": "@body('Peek')",
+                "headers": {
+                  "Content-Type": "application/json"
+                }
+              },
+              "operationOptions": "DisableAsyncPattern",
+              "runtimeConfiguration": {
+                "secureData": {
+                  "properties": [
+                    "inputs",
+                    "outputs"
+                  ]
+                }
+              },
+              "runAfter": {}
+            },
+            "Complete_after_commit": {
+              "type": "If",
+              "expression": "@equals(outputs('Apply')?['statusCode'],200)",
+              "actions": {
+                "Settle": {
+                  "type": "Http",
+                  "inputs": {
+                    "method": "DELETE",
+                    "uri": "@outputs('Lock_location')",
+                    "authentication": "@parameters('brokerAuth')",
+                    "retryPolicy": {
+                      "type": "None"
+                    }
+                  },
+                  "operationOptions": "DisableAsyncPattern",
+                  "runtimeConfiguration": {
+                    "secureData": {
+                      "properties": [
+                        "inputs",
+                        "outputs"
+                      ]
+                    }
+                  },
+                  "runAfter": {}
+                }
+              },
+              "else": {
+                "actions": {
+                  "Unexpected_apply_status": {
+                    "type": "Terminate",
+                    "inputs": {
+                      "runStatus": "Failed",
+                      "runError": {
+                        "code": "UnexpectedApplyStatus",
+                        "message": "Expected committed apply response."
+                      }
+                    },
+                    "runAfter": {}
+                  }
+                }
+              },
+              "runAfter": {
+                "Apply": [
+                  "Succeeded"
+                ]
+              }
+            }
+          },
+          "else": {
+            "actions": {
+              "Unexpected_lock_location": {
+                "type": "Terminate",
+                "inputs": {
+                  "runStatus": "Failed",
+                  "runError": {
+                    "code": "InvalidLocation",
+                    "message": "Unexpected broker settlement URI."
+                  }
+                },
+                "runAfter": {}
+              }
+            }
+          },
+          "runAfter": {
+            "Lock_location": [
+              "Succeeded"
+            ]
+          }
+        }
+      },
+      "else": {
+        "actions": {}
+      },
+      "runAfter": {
+        "Peek": [
+          "Succeeded"
+        ]
+      }
+    }
+  },
+  "outputs": {}
+}

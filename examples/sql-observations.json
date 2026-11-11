@@ -1,0 +1,31 @@
+{
+  "population": "Happy-path chronological publish, relay and consumption of 1,000 sample submissions",
+  "deliveries": [
+    {
+      "subscription": "audit",
+      "state": "done",
+      "deliveries": 1000,
+      "attempts": 1000
+    },
+    {
+      "subscription": "fulfillment",
+      "state": "done",
+      "deliveries": 1000,
+      "attempts": 1000
+    }
+  ],
+  "dead_letters": [],
+  "current_orders_by_status": [
+    {
+      "status": "amended",
+      "orders": 170,
+      "current_total_minor": 24551884
+    },
+    {
+      "status": "submitted",
+      "orders": 660,
+      "current_total_minor": 102378912
+    }
+  ],
+  "missing_receipts": []
+}

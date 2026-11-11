@@ -1,0 +1,16 @@
+{
+  "conditional_modules": 3,
+  "subscription_names": [
+    "fulfillment",
+    "audit"
+  ],
+  "topic_duplicate_window": "PT10M",
+  "max_delivery_count": 5,
+  "initial_workflow_state": "Disabled",
+  "phase_default": "off",
+  "function_runtime": "Python 3.12",
+  "workflow_settlement": "apply succeeds with HTTP 200 then DELETE locked URI",
+  "dev_parameters_compiled": true,
+  "production_parameters_rejected": true,
+  "bicep_version": "Bicep CLI version 0.46.1 (545b338e2c)"
+}

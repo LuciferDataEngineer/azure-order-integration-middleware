@@ -1,0 +1,10 @@
+/data/
+/.venv/
+**/__pycache__/
+*.py[cod]
+*.sqlite*
+*.log
+*.zip
+.env*
+local.settings.json
+.DS_Store

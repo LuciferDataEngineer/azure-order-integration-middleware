@@ -1,0 +1,22 @@
+{
+  "access_mode": "github_https",
+  "access_utc": "2026-11-11T09:10:41.870294+00:00",
+  "commit": "8fe3fd0c9a825fef3ae6d601e97537b612d7b214",
+  "url": "https://raw.githubusercontent.com/microsoft/sql-server-samples/8fe3fd0c9a825fef3ae6d601e97537b612d7b214/samples/databases/northwind-pubs/instnwnd.sql",
+  "source_bytes": 1049720,
+  "source_sha256": "3cc62b3fca6d244a47dbde698b809331e4f85988a0685b2b370717d431e94871",
+  "generator": "northwind-submission-generator-v1",
+  "source_order_count": 830,
+  "source_order_details": 2155,
+  "first_source_order_date": "1996-07-04",
+  "last_source_order_date": "1998-05-06",
+  "distinct_products": 77,
+  "submissions": 1000,
+  "version_1": 830,
+  "synthetic_version_2": 170,
+  "unique_event_ids": 1000,
+  "unique_order_versions": 1000,
+  "submissions_bytes": 468693,
+  "submissions_sha256": "f7bd136bfbcd536264b1a60190045bc8602072a604e9855f79000c872d4e02a7",
+  "deliveries_path": "deliveries/northwind-submission-generator-v1/f7bd136bfbcd536264b1a60190045bc8602072a604e9855f79000c872d4e02a7/submissions.jsonl"
+}

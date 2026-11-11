@@ -1,0 +1,20 @@
+{
+  "input": "Northwind sample with 170 synthetic amendments, out-of-order delivery, injected defects and outage",
+  "workload_sha256": "f7bd136bfbcd536264b1a60190045bc8602072a604e9855f79000c872d4e02a7",
+  "logical_submissions": 1000,
+  "extra_ingress_retries": 10,
+  "extra_deliveries_per_subscription": 10,
+  "audit_events_while_fulfillment_unavailable": 1000,
+  "fulfillment_orders_during_outage": 0,
+  "reconciled_audit_events": 1000,
+  "reconciled_current_orders": 830,
+  "current_order_total_minor": 126930796,
+  "out_of_order_stale_fulfillment_events": 169,
+  "dlq_redrives": 1,
+  "malformed_ingress_repairs": 1,
+  "replayed_after_reopen": 1000,
+  "unchanged_after_exact_replay": true,
+  "foreign_key_violations": 0,
+  "sqlite_integrity": "ok",
+  "azure_deployed": false
+}
